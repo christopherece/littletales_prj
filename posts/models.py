@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from PIL import Image
 from children.models import Child
 
@@ -119,7 +120,9 @@ class Announcement(models.Model):
         return True
     
     def __str__(self):
-        return f"{self.title} by {self.created_by.user.username} ({self.created_by.get_user_type_display()}) - {self.get_announcement_type_display()}"
+        creator_username = self.created_by.user.username if self.created_by and self.created_by.user else 'Unknown'
+        creator_type = self.created_by.get_user_type_display() if self.created_by else 'Unknown'
+        return f"{self.title} by {creator_username} ({creator_type}) - {self.get_announcement_type_display()}"
     
     @property
     def image_url(self):
@@ -127,6 +130,10 @@ class Announcement(models.Model):
         if self.created_by and self.created_by.image:
             return self.created_by.image.url
         return '/static/img/user-default.png'
+    
+    def get_absolute_url(self):
+        """Get URL for viewing the announcement"""
+        return reverse('announcement-detail', kwargs={'pk': self.pk})
     
     def clean(self):
         """Ensure only teachers can create announcements and validate dates"""

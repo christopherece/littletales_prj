@@ -7,13 +7,13 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 class PostForm(forms.ModelForm):
-    image = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={
+    media = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={
         'accept': 'image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx'
     }), max_length=500)
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'image']
+        fields = ['title', 'content', 'media']
         widgets = {
             'content': forms.Textarea(attrs={'rows': 4}),
         }
@@ -22,8 +22,8 @@ class PostForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['image'].required = False
 
-    def clean_image(self):
-        image = self.cleaned_data.get('image')
+    def clean_media(self):
+        media = self.cleaned_data.get('media')
         if image:
             try:
                 logger.info(f"Processing file: {image.name}")
