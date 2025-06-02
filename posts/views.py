@@ -11,8 +11,56 @@ from django.db.models import Count, Q
 from django.contrib.sessions.models import Session
 from .models import Post, Comment, Announcement, Notification
 from django.contrib.auth.models import User
+from users.models import Profile
 from django.contrib import messages
-from .forms import PostForm
+from .forms import PostForm, AnnouncementForm
+
+class AnnouncementDetailView(LoginRequiredMixin, DetailView):
+    model = Announcement
+    template_name = 'posts/announcement_detail.html'
+    context_object_name = 'announcement'
+    
+    def get_queryset(self):
+        return Announcement.objects.filter(is_active=True)
+
+
+class AnnouncementCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Announcement
+    form_class = AnnouncementForm
+    template_name = 'posts/announcement_form.html'
+    
+    def test_func(self):
+        return self.request.user.profile.user_type == 'teacher'
+    
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user.profile
+        return super().form_valid(form)
+
+
+class AnnouncementUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Announcement
+    form_class = AnnouncementForm
+    template_name = 'posts/announcement_form.html'
+    
+    def test_func(self):
+        announcement = self.get_object()
+        return announcement.created_by == self.request.user.profile
+    
+    def get_queryset(self):
+        return Announcement.objects.filter(is_active=True)
+
+
+class AnnouncementDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Announcement
+    template_name = 'posts/announcement_confirm_delete.html'
+    success_url = reverse_lazy('home')
+    
+    def test_func(self):
+        announcement = self.get_object()
+        return announcement.created_by == self.request.user.profile
+    
+    def get_queryset(self):
+        return Announcement.objects.filter(is_active=True)
 
 # Home view to display all posts
 class PostListView(LoginRequiredMixin, ListView):
@@ -25,11 +73,22 @@ class PostListView(LoginRequiredMixin, ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Get upcoming active announcements
-        context['announcements'] = Announcement.objects.filter(
+        
+        # Combine posts and announcements in the feed
+        posts = Post.objects.all()
+        announcements = Announcement.objects.filter(
             is_active=True,
             event_date__gte=timezone.now()
-        ).order_by('event_date')[:5]  # Limit to 5 upcoming events
+        ).order_by('event_date')
+        
+        # Combine and sort by created_at
+        feed_items = sorted(
+            list(posts) + list(announcements),
+            key=lambda x: x.created_at if hasattr(x, 'created_at') else x.event_date,
+            reverse=True
+        )[:50]  # Limit to 50 items
+        
+        context['feed_items'] = feed_items
         
         # Get currently logged in users (users with active sessions)
         active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
@@ -43,18 +102,18 @@ class PostListView(LoginRequiredMixin, ListView):
                 logged_in_user_ids.append(int(user_id))
         
         # Get all users who are currently logged in
-        active_users = User.objects.filter(id__in=logged_in_user_ids).order_by('-last_login')[:10]  # Top 10 logged in users
+        active_profiles = Profile.objects.filter(user_id__in=logged_in_user_ids).order_by('-user__last_login')[:10]  # Top 10 logged in users
         
         # Mark all as online and add post count
-        for user in active_users:
-            user.is_online = True
-            user.post_count = Post.objects.filter(author=user).count()
+        for profile in active_profiles:
+            profile.is_online = True
+            profile.post_count = Post.objects.filter(author=profile).count()
         
-        context['active_users'] = active_users
+        context['active_profiles'] = active_profiles
         
         # Add unread notifications count for the current user
         if self.request.user.is_authenticated:
-            context['unread_notifications_count'] = Notification.objects.filter(
+            context['unread_notifications'] = Notification.objects.filter(
                 recipient=self.request.user,
                 is_read=False
             ).count()
@@ -70,12 +129,14 @@ class UserPostListView(ListView):
     
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
-        return Post.objects.filter(author=user).order_by('-created_at')
+        profile = get_object_or_404(Profile, user=user)
+        return Post.objects.filter(author=profile).order_by('-created_at')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = get_object_or_404(User, username=self.kwargs.get('username'))
-        context['user_profile'] = user.profile
+        profile = get_object_or_404(Profile, user=user)
+        context['user_profile'] = profile
         return context
 
 # Post detail view
@@ -97,7 +158,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Save the form with commit=False to handle author and media
         post = form.save(commit=False)
-        post.author = self.request.user
+        post.author = self.request.user.profile
         # Handle file upload
         if self.request.FILES.get('media'):
             post.media = self.request.FILES['media']

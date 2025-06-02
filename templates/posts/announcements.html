@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Announcements</h2>
+                    {% if request.user.profile.user_type == 'teacher' %}
+                        <a href="{% url 'create-announcement' %}" class="btn btn-primary">Create Announcement</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if announcements %}
+                        <div class="list-group">
+                            {% for announcement in announcements %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ announcement.title }}</h5>
+                                        <small class="text-muted">
+                                            {% if announcement.is_past_event %}
+                                                <span class="badge bg-danger">Past Event</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Upcoming</span>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1">{{ announcement.content|truncatewords:50 }}</p>
+                                    <small class="text-muted">
+                                        Created by {{ announcement.created_by.user.username }} ({{ announcement.created_by.get_user_type_display }})
+                                        on {{ announcement.created_at|date:"F j, Y" }} at {{ announcement.created_at|time:"H:i" }}
+                                    </small>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Event Date: {{ announcement.event_date|date:"F j, Y" }} at {{ announcement.event_date|time:"H:i" }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No announcements available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

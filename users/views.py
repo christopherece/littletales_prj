@@ -53,15 +53,17 @@ def profile(request):
 def user_profile(request, username):
     """View for viewing other users' profiles"""
     profile_user = get_object_or_404(User, username=username)
+    profile = get_object_or_404(Profile, user=profile_user)
     
     # Get user's posts
-    posts = Post.objects.filter(author=profile_user).order_by('-created_at')[:5]
+    posts = Post.objects.filter(author=profile).order_by('-created_at')[:5]
     
     # Check if this is the current user's profile
     is_own_profile = request.user.is_authenticated and request.user == profile_user
     
     context = {
         'profile_user': profile_user,
+        'profile': profile,
         'posts': posts,
         'is_own_profile': is_own_profile
     }

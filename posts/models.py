@@ -12,11 +12,11 @@ class Post(models.Model):
     """Model for sharing children's activities and achievements"""
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.FileField(upload_to=lambda instance, filename: f'posts/{instance.author.username}/{filename}', blank=True, null=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    image = models.FileField(upload_to='posts/%(username)s/%(filename)s', blank=True, null=True)
+    author = models.ForeignKey('users.Profile', on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
+    likes = models.ManyToManyField('users.Profile', related_name='liked_posts', blank=True)
     POST_TYPES = (
         ('activity', 'Learning Activity'),
         ('achievement', 'Achievement'),
@@ -31,7 +31,14 @@ class Post(models.Model):
         verbose_name_plural = 'Posts'
     
     def __str__(self):
-        return f"{self.title} by {self.author.username}"
+        return f"{self.title} by {self.author.user.username} ({self.author.get_user_type_display()})"
+    
+    @property
+    def image_url(self):
+        """Return the profile image URL of the author"""
+        if self.author and self.author.image:
+            return self.author.image.url
+        return '/static/img/user-default.png'
     
     def get_absolute_url(self):
         return reverse('post-detail', kwargs={'pk': self.pk})
@@ -71,68 +78,79 @@ class Post(models.Model):
 class Comment(models.Model):
     """Model for comments on posts"""
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey('users.Profile', on_delete=models.CASCADE, related_name='comments')
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at']  # Changed to -created_at to show newest comments first
     
     def __str__(self):
-        return f'Comment by {self.author.username} on {self.post.title}'
+        return f'Comment by {self.author.user.username} ({self.author.get_user_type_display()}) on {self.post.title}'
 
 
 class Announcement(models.Model):
     """Model for school/center announcements"""
+    ANNOUNCEMENT_TYPES = (
+        ('general', 'General'),
+        ('event', 'Event'),
+        ('holiday', 'Holiday'),
+        ('emergency', 'Emergency'),
+    )
+    
     title = models.CharField(max_length=200)
     content = models.TextField()
     event_date = models.DateTimeField()
+    announcement_type = models.CharField(max_length=20, choices=ANNOUNCEMENT_TYPES, default='general', null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
+    created_by = models.ForeignKey('users.Profile', on_delete=models.CASCADE, related_name='announcements', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     
     class Meta:
         ordering = ['event_date']
     
+    @property
+    def is_post(self):
+        return False
+    
+    @property
+    def is_announcement(self):
+        return True
+    
     def __str__(self):
-        return self.title
+        return f"{self.title} by {self.created_by.user.username} ({self.created_by.get_user_type_display()}) - {self.get_announcement_type_display()}"
+    
+    @property
+    def image_url(self):
+        """Return the profile image URL of the creator, or default image if none exists"""
+        if self.created_by and self.created_by.image:
+            return self.created_by.image.url
+        return '/static/img/user-default.png'
+    
+    def clean(self):
+        """Ensure only teachers can create announcements and validate dates"""
+        if self.created_by and self.created_by.user_type != 'teacher':
+            raise ValidationError('Only teachers can create announcements')
+        
+        if self.event_date < timezone.now():
+            raise ValidationError('Event date must be in the future')
+            
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    def save(self, *args, **kwargs):
+        # Set is_active to True by default if not already set
+        if not hasattr(self, 'is_active') or self.is_active is None:
+            self.is_active = True
+        self.clean()
+        super().save(*args, **kwargs)
     
     @property
     def is_past_event(self):
         return self.event_date < timezone.now()
-# Comment model for users to comment on posts
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['created_at']
-    
-    def __str__(self):
-        return f'Comment by {self.author.username} on {self.post.title}'
 
-# Announcement/Event model for admins to create events
-class Announcement(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    event_date = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
-    is_active = models.BooleanField(default=True)
-    
-    class Meta:
-        ordering = ['event_date']
-    
-    def __str__(self):
-        return self.title
-    
-    @property
-    def is_past_event(self):
-        return self.event_date < timezone.now()
 
 # Notification model for tracking interactions
 class Notification(models.Model):

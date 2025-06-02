@@ -2,19 +2,25 @@ from django.urls import path
 from . import views
 from .views import (
     PostListView, PostDetailView, PostCreateView,
-    PostUpdateView, PostDeleteView, UserPostListView
+    PostUpdateView, PostDeleteView, UserPostListView,
+    AnnouncementDetailView, AnnouncementCreateView,
+    AnnouncementUpdateView, AnnouncementDeleteView
 )
-from .views_simple import create_post
 
 urlpatterns = [
     path('', PostListView.as_view(), name='home'),
     path('user/<str:username>/', UserPostListView.as_view(), name='user-posts'),
     path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
-    path('post/new/', create_post, name='post-create'),
+    path('post/new/', PostCreateView.as_view(), name='post-create'),
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
     path('post/<int:pk>/comment/', views.add_comment, name='add-comment'),
     path('post/<int:pk>/like/', views.like_post, name='like-post'),
+    path('announcements/', AnnouncementCreateView.as_view(), name='announcements'),
+    path('announcements/new/', AnnouncementCreateView.as_view(), name='create-announcement'),
+    path('announcements/<int:pk>/', AnnouncementDetailView.as_view(), name='announcement-detail'),
+    path('announcements/<int:pk>/update/', AnnouncementUpdateView.as_view(), name='announcement-update'),
+    path('announcements/<int:pk>/delete/', AnnouncementDeleteView.as_view(), name='announcement-delete'),
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark-notification-read'),
     path('notifications/<int:notification_id>/mark-read/', views.mark_notification_read_ajax, name='mark-notification-read-ajax'),

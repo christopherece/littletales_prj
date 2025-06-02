@@ -20,8 +20,16 @@ class Profile(models.Model):
         # Return the user-default.png image
         return static('img/user-default.png')
     
+    USER_TYPES = (
+        ('parent', 'Parent'),
+        ('teacher', 'Teacher'),
+        ('admin', 'Administrator')
+    )
+    
+    user_type = models.CharField(max_length=10, choices=USER_TYPES, default='parent')
+    
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return f'{self.user.username} ({self.get_user_type_display()}) Profile'
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

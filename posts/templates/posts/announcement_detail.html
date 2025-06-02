@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Announcement - {{ announcement.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">{{ announcement.title }}</h4>
+                        {% if announcement.created_by == user.profile %}
+                        <div class="btn-group">
+                            <a href="{% url 'announcement-update' announcement.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'announcement-delete' announcement.id %}" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            Created by {{ announcement.created_by.user.username }} on {{ announcement.created_at|date:"F j, Y" }}
+                            <span class="badge bg-info ms-2">{{ announcement.get_announcement_type_display }}</span>
+                            <span class="badge bg-secondary ms-2">{{ announcement.event_date|date:"F j, Y" }}</span>
+                        </small>
+                    </div>
+                    <div class="content">
+                        {{ announcement.content|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
