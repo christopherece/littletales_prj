@@ -39,42 +39,106 @@
     }
     
     .feature-card {
-        background: var(--card-bg);
-        border: 2px solid var(--border-color);
+        background: linear-gradient(135deg, var(--card-bg), rgba(255, 255, 255, 0.95));
+        border: 2px solid var(--primary-color);
         border-radius: 20px;
-        padding: 2rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 30px var(--shadow-color);
+        padding: 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
     }
-    
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, rgba(74, 144, 226, 0.1), rgba(46, 204, 113, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
     .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 40px var(--shadow-color);
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
     }
-    
+
+    .feature-card:hover::before {
+        opacity: 1;
+    }
+
     .feature-card i {
         font-size: 3rem;
         color: var(--primary-color);
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 1;
     }
-    
+
     .feature-card:hover i {
-        transform: scale(1.2);
+        transform: scale(1.2) rotate(10deg);
         color: var(--accent-color);
     }
-    
+
     .feature-card h3 {
-        font-size: 1.75rem;
+        font-size: 1.6rem;
         color: var(--text-color);
         margin-bottom: 1rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
     }
-    
+
     .feature-card p {
         color: #666;
         font-size: 1.1rem;
         line-height: 1.6;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
     }
-    
+
+    .feature-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-card ul li {
+        margin-bottom: 1rem;
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .feature-card ul li::before {
+        content: '\f005';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover ul li::before {
+        color: var(--accent-color);
+        transform: scale(1.2) rotate(10deg);
+        animation: star-twinkle 0.5s infinite;
+    }
+
+    @keyframes star-twinkle {
+        0% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+        50% { opacity: 0.8; transform: scale(1.1) rotate(15deg); }
+        100% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+    }
+
     .btn-primary {
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         border: none;
@@ -125,23 +189,28 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6 welcome-hero text-center">
             <h1 class="display-4 mb-4">{{ site_config.welcome_title|default:"Welcome to LittleTales" }}</h1>
-            <p class="lead mb-4">{{ site_config.welcome_subtitle|default:"A fun and safe space for children to learn and grow" }}</p>
+            <p class="lead mb-4">{{ site_config.welcome_subtitle|default:"A magical place where learning meets adventure" }}</p>
             <div class="d-flex justify-content-center gap-3">
-                <a href="{% url 'login' %}" class="btn btn-primary">Join the Fun</a>
-                <a href="{% url 'register' %}" class="btn btn-outline-primary">Create Account</a>
+                <a href="{% url 'login' %}" class="btn btn-primary">Start Learning</a>
+                <a href="{% url 'register' %}" class="btn btn-outline-primary">Join Our Community</a>
             </div>
         </div>
     </div>
 
-    <div class="row justify-content-center mt-5">git remote
-        <div class="col-md-8">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-12">
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="feature-card h-100">
                         <div class="card-body text-center">
                             <i class="fas fa-rocket fa-3x mb-3"></i>
-                            <h3 class="h5 mb-3">Learning Adventures</h3>
-                            <p class="text-muted">Explore exciting educational activities and games for kids</p>
+                            <h3 class="h5 mb-3">Learning Quests</h3>
+                            <p class="text-muted">Embark on exciting educational adventures tailored for kids</p>
+                            <ul class="list-unstyled text-muted">
+                                <li>Interactive lessons</li>
+                                <li>Fun games</li>
+                                <li>Educational videos</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -149,8 +218,13 @@
                     <div class="feature-card h-100">
                         <div class="card-body text-center">
                             <i class="fas fa-magic fa-3x mb-3"></i>
-                            <h3 class="h5 mb-3">Magic of Stories</h3>
-                            <p class="text-muted">Discover enchanting tales and interactive storytelling</p>
+                            <h3 class="h5 mb-3">Story World</h3>
+                            <p class="text-muted">Immerse yourself in magical stories and creative writing</p>
+                            <ul class="list-unstyled text-muted">
+                                <li>Original stories</li>
+                                <li>Story creation</li>
+                                <li>Reading challenges</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -158,12 +232,62 @@
                     <div class="feature-card h-100">
                         <div class="card-body text-center">
                             <i class="fas fa-star fa-3x mb-3"></i>
-                            <h3 class="h5 mb-3">Achievements</h3>
-                            <p class="text-muted">Earn badges and rewards for your learning journey</p>
+                            <h3 class="h5 mb-3">Growth Journey</h3>
+                            <p class="text-muted">Track your progress and earn amazing rewards</p>
+                            <ul class="list-unstyled text-muted">
+                                <li>Achievement badges</li>
+                                <li>Progress tracking</li>
+                                <li>Learning certificates</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-12">
+            <div class="text-center">
+                <h2 class="mb-4">Why Parents Love LittleTales</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="feature-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-shield-alt fa-3x mb-3 text-success"></i>
+                                <h3 class="h5 mb-3">Safe Learning</h3>
+                                <p class="text-muted">A secure environment designed specifically for children</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                                <h3 class="h5 mb-3">Track Progress</h3>
+                                <p class="text-muted">Monitor your child's learning journey with detailed analytics</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-heart fa-3x mb-3 text-success"></i>
+                                <h3 class="h5 mb-3">Engaging Content</h3>
+                                <p class="text-muted">Fun and interactive activities that make learning exciting</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8 text-center">
+            <h2 class="mb-4">Join Our Learning Community</h2>
+            <p class="lead mb-4">Create an account today and start your child's learning adventure!</p>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started Now</a>
         </div>
     </div>
 </div>
