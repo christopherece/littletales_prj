@@ -52,22 +52,7 @@
                         <h3><a href="{% url 'post-detail' post.id %}" class="text-decoration-none">{{ post.title }}</a></h3>
                         {% if post.image %}
                         <div class="post-media mb-3">
-                            {% with ext=post.image.url|lower %}
-                                {% if ext|slice:"-4:" == '.mp4' or ext|slice:"-4:" == '.mov' or ext|slice:"-4:" == '.avi' or ext|slice:"-5:" == '.webm' %}
-                                <video controls class="img-fluid rounded w-100">
-                                    <source src="{{ post.image.url }}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                                {% elif ext|slice:"-4:" == '.pdf' or ext|slice:"-5:" == '.docx' or ext|slice:"-4:" == '.doc' or ext|slice:"-5:" == '.xlsx' or ext|slice:"-4:" == '.xls' or ext|slice:"-5:" == '.pptx' or ext|slice:"-4:" == '.ppt' %}
-                                <div class="p-4 border rounded bg-light text-center">
-                                    <i class="fas fa-file-alt fa-3x mb-3"></i>
-                                    <p class="mb-2">{{ post.image.name|slice:"11:" }}</p>
-                                    <a href="{{ post.image.url }}" class="btn btn-primary" target="_blank">View Document</a>
-                                </div>
-                                {% else %}
-                                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded">
-                                {% endif %}
-                            {% endwith %}
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded">
                         </div>
                         {% endif %}
                         <p>{{ post.content|truncatewords:50 }}</p>

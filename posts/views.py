@@ -12,6 +12,7 @@ from django.contrib.sessions.models import Session
 from .models import Post, Comment, Announcement, Notification
 from django.contrib.auth.models import User
 from django.contrib import messages
+from .forms import PostForm
 
 # Home view to display all posts
 class PostListView(LoginRequiredMixin, ListView):
@@ -91,30 +92,33 @@ class PostDetailView(DetailView):
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     template_name = 'posts/post_form.html'
-    fields = ['title', 'content', 'image']
+    form_class = PostForm
     
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
+        # Save the form with commit=False to handle author and media
+        post = form.save(commit=False)
+        post.author = self.request.user
+        # Handle file upload
+        if self.request.FILES.get('media'):
+            post.media = self.request.FILES['media']
+        post.save()
+        messages.success(self.request, 'Your post has been created!')
+        return redirect('home')
+    
+    def form_invalid(self, form):
+        # If form is invalid
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, f'{field}: {error}')
+        return self.render_to_response(self.get_context_data(form=form))
     
     def post(self, request, *args, **kwargs):
-        # Check if this is a modal submission
-        if request.POST.get('from_modal') == 'true':
-            form = self.get_form()
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.author = request.user
-                post.save()
-                messages.success(request, 'Your post has been created!')
-                return redirect('home')
-            else:
-                # If form is invalid, return to home with error message
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f'{field}: {error}')
-                return redirect('home')
-        # Otherwise process as normal
-        return super().post(request, *args, **kwargs)
+        # Get the form
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
 # Update post view
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):

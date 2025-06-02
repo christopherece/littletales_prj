@@ -150,22 +150,19 @@ TIME_ZONE = 'Pacific/Auckland'
 
 USE_I18N = True
 
-USE_TZ = True
-
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Ensure admin static files are served correctly
-ADMIN_MEDIA_PREFIX = '/static/admin/'
-
-# Media files
+# Media files (User uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+USE_TZ = True
+
+# Ensure admin static files are served correctly
+ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'

@@ -14,7 +14,7 @@
                     <form method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger">Delete Profile</button>
-                        <a href="{% url 'children:detail' child.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="{% url 'children:child-detail' child.pk %}" class="btn btn-outline-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

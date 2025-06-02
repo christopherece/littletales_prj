@@ -88,7 +88,7 @@ def delete_child(request, pk):
     if request.method == 'POST':
         child.delete()
         messages.success(request, 'Child profile deleted successfully!')
-        return redirect('child-dashboard')
+        return redirect('children:dashboard')
     
     return render(request, 'children/delete_child.html', {'child': child})
 

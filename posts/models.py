@@ -12,7 +12,7 @@ class Post(models.Model):
     """Model for sharing children's activities and achievements"""
     title = models.CharField(max_length=200)
     content = models.TextField()
-    media = models.FileField(upload_to='posts/media/', blank=True, null=True)
+    image = models.FileField(upload_to='post_media', blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -25,21 +25,13 @@ class Post(models.Model):
     )
     post_type = models.CharField(max_length=20, choices=POST_TYPES, default='note')
     
-    @property
-    def media_url(self):
-        """Get URL for media with default if none exists"""
-        try:
-            if self.media and hasattr(self.media, 'url'):
-                return self.media.url
-        except Exception:
-            pass
-        return '/static/img/default-post.png'
-    
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Post'
+        verbose_name_plural = 'Posts'
     
     def __str__(self):
-        return f"{self.title} - {self.child.first_name}"
+        return f"{self.title} by {self.author.username}"
     
     def get_absolute_url(self):
         return reverse('post-detail', kwargs={'pk': self.pk})
@@ -48,18 +40,21 @@ class Post(models.Model):
         return self.likes.count()
         
     def save(self, *args, **kwargs):
+        # Ensure image path is set correctly
+        if self.image:
+            self.image.name = f'post_media/{self.image.name}'
         super().save(*args, **kwargs)
         
         # Try to resize if it's an image file
         try:
-            if self.media and hasattr(self.media, 'path'):
-                file_name = self.media.name.lower()
+            if self.image and hasattr(self.image, 'path'):
+                file_name = self.image.name.lower()
                 if file_name.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')):
-                    img = Image.open(self.media.path)
+                    img = Image.open(self.image.path)
                     if img.height > 800 or img.width > 800:
                         output_size = (800, 800)
                         img.thumbnail(output_size)
-                        img.save(self.media.path)
+                        img.save(self.image.path)
         except Exception as e:
             print(f"Error processing post media: {e}")
             # Continue without failing
