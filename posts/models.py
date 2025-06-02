@@ -12,7 +12,7 @@ class Post(models.Model):
     """Model for sharing children's activities and achievements"""
     title = models.CharField(max_length=200)
     content = models.TextField()
-    image = models.FileField(upload_to='post_media', blank=True, null=True)
+    image = models.FileField(upload_to=lambda instance, filename: f'posts/{instance.author.username}/{filename}', blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -42,7 +42,15 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         # Ensure image path is set correctly
         if self.image:
-            self.image.name = f'post_media/{self.image.name}'
+            # The upload_to path is already handled by the FileField
+            # We just need to make sure the directory exists
+            try:
+                import os
+                from django.conf import settings
+                dir_path = os.path.join(settings.MEDIA_ROOT, 'posts', self.author.username)
+                os.makedirs(dir_path, exist_ok=True)
+            except Exception as e:
+                print(f"Error creating directory: {e}")
         super().save(*args, **kwargs)
         
         # Try to resize if it's an image file

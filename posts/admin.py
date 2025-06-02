@@ -11,24 +11,24 @@ class PostAdmin(admin.ModelAdmin):
     readonly_fields = ('show_media_preview',)
     
     def show_media(self, obj):
-        if obj.media:
-            if obj.media.url.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                return format_html('<img src="{}" style="max-height: 50px;">', obj.media.url)
-            elif obj.media.url.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
-                return format_html('<video width="50" height="50" controls><source src="{}" type="video/mp4"></video>', obj.media.url)
+        if obj.image:
+            if obj.image.url.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                return format_html('<img src="{}" style="max-height: 50px;">', obj.image.url)
+            elif obj.image.url.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
+                return format_html('<video width="50" height="50" controls><source src="{}" type="video/mp4"></video>', obj.image.url)
             else:
-                return format_html('<a href="{}">File</a>', obj.media.url)
+                return format_html('<a href="{}">File</a>', obj.image.url)
         return '-'
     show_media.short_description = 'Media'
     
     def show_media_preview(self, obj):
-        if obj.media:
-            if obj.media.url.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                return format_html('<img src="{}" style="max-width: 300px; max-height: 300px;">', obj.media.url)
-            elif obj.media.url.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
-                return format_html('<video width="300" height="300" controls><source src="{}" type="video/mp4"></video>', obj.media.url)
+        if obj.image:
+            if obj.image.url.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                return format_html('<img src="{}" style="max-width: 300px; max-height: 300px;">', obj.image.url)
+            elif obj.image.url.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
+                return format_html('<video width="300" height="300" controls><source src="{}" type="video/mp4"></video>', obj.image.url)
             else:
-                return format_html('<a href="{}">File</a>', obj.media.url)
+                return format_html('<a href="{}">File</a>', obj.image.url)
         return '-'
     show_media_preview.short_description = 'Media Preview'
 

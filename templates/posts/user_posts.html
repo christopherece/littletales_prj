@@ -43,6 +43,11 @@
                     </div>
                     <div class="post-content">
                         <h3><a href="{% url 'post-detail' post.id %}" class="text-decoration-none">{{ post.title }}</a></h3>
+                        {% if post.image %}
+                            <div class="post-media mb-3">
+                                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded">
+                            </div>
+                        {% endif %}
                         <p>{{ post.content|truncatewords:50 }}</p>
                     </div>
                     <div class="post-actions">
