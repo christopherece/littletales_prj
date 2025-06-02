@@ -36,6 +36,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html', http_method_names=['get', 'post']), name='logout'),
     path('register/', include('users.urls')),
     path('chat/', include('chat.urls')),
+    path('children/', include('children.urls', namespace='children')),
     path('early-learning/', include('early_learning.urls', namespace='early_learning')),
     # Pages
     path('about/', about_view, name='about'),

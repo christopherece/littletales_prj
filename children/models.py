@@ -1,4 +1,56 @@
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
+
+class Child(models.Model):
+    """Model representing a child profile"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    date_of_birth = models.DateField()
+    profile_picture = models.ImageField(upload_to='children/profile_pics/', blank=True, null=True)
+    interests = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def age(self):
+        """Calculate the child's age"""
+        today = timezone.now().date()
+        age = today.year - self.date_of_birth.year
+        if (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day):
+            age -= 1
+        return age
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+class LearningActivity(models.Model):
+    """Model representing a learning activity for a child"""
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='activities')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    activity_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('reading', 'Reading'),
+            ('writing', 'Writing'),
+            ('math', 'Math'),
+            ('science', 'Science'),
+            ('art', 'Art'),
+            ('music', 'Music'),
+            ('physical', 'Physical Activity')
+        ]
+    )
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} for {self.child.first_name} {self.child.last_name}"
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.urls import reverse

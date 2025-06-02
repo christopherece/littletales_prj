@@ -285,9 +285,18 @@
 
     <div class="row justify-content-center mt-5">
         <div class="col-md-8 text-center">
-            <h2 class="mb-4">Join Our Learning Community</h2>
-            <p class="lead mb-4">Create an account today and start your child's learning adventure!</p>
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get Started Now</a>
+            <div class="welcome-hero">
+                <h1>Welcome to LittleTales</h1>
+                <p class="lead">A safe and engaging learning platform for children</p>
+                {% if user.is_authenticated %}
+                    <div class="d-flex flex-column gap-3">
+                        <a href="{% url 'children:dashboard' %}" class="btn btn-primary btn-lg">View My Children</a>
+                        <a href="{% url 'children:add-child' %}" class="btn btn-outline-primary btn-lg">Add New Child</a>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Get Started</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

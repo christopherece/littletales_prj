@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Children{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">My Children</h2>
+        <a href="{% url 'children:add-child' %}" class="btn btn-primary">Add New Child</a>
+    </div>
+
+    <!-- Notifications -->
+    {% if unread_notifications %}
+    <div class="alert alert-info mb-4">
+        <h5 class="alert-heading h6 mb-2">Notifications</h5>
+        <ul class="list-unstyled mb-0">
+            {% for notification in unread_notifications %}
+            <li class="mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ notification.title }}</strong>
+                        <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                    <a href="{% url 'children:mark-read' notification.pk %}" class="btn btn-sm btn-outline-primary">
+                        Mark as Read
+                    </a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Recent Activities -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Recent Activities</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_activities %}
+            <ul class="list-unstyled">
+                {% for activity in recent_activities %}
+                <li class="mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ activity.title }}</h6>
+                            <small class="text-muted">{{ activity.created_at|date:"M j, Y" }}</small>
+                        </div>
+                        <span class="badge bg-{{ activity.get_activity_type_display|lower }}">
+                            {{ activity.get_activity_type_display }}
+                        </span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">No recent activities to display.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Children Grid -->
+    <div class="row g-4">
+        {% for child in children %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <img src="{{ child.profile_picture_url }}" 
+                             alt="{{ child.first_name }}'s profile" 
+                             class="rounded-circle" 
+                             style="width: 100px; height: 100px; object-fit: cover;">
+                    </div>
+                    <h5 class="card-title mb-1">{{ child.first_name }} {{ child.last_name }}</h5>
+                    <p class="card-text text-muted mb-2">Age: {{ child.age }}</p>
+                    <p class="card-text">{{ child.interests|truncatewords:8 }}</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'children:child-detail' child.pk %}" class="btn btn-outline-primary w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <h4>No children added yet</h4>
+                <p class="text-muted">Click the "Add New Child" button above to get started!</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

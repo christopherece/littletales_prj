@@ -556,67 +556,63 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top bg-white shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                {% if site_config.logo %}
-                    <img src="{{ site_config.logo.url }}" alt="LittleTales" height="30" class="me-1">
-                {% else %}
-                    <span class="navbar-brand">LittleTales</span>
-                {% endif %}
-                LittleTales
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <img src="{% static 'img/logo.png' %}" alt="LittleTales" height="30" class="me-2">
+                <span class="fw-bold">LittleTales</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-
-                
-                <ul class="navbar-nav mx-auto text-center">
-                    {% if user.is_authenticated %}
+                <!-- Left-aligned items -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'home' %}">
-                            <i class="fas fa-home fa-lg me-2"></i>
-                            <span>Home</span>
-                        </a>
+                        <a class="nav-link active" href="{% url 'home' %}">Home</a>
                     </li>
-
-
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'notifications' %}">
-                            <div class="position-relative me-2">
-                                <i class="fas fa-bell fa-lg"></i>
-                                {% if unread_notifications_count > 0 %}
-                                <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;" id="notification-counter">
-                                    {{ unread_notifications_count }}
-                                </span>
-                                {% endif %}
-                            </div>
-                            <span>Notifications</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'chat-inbox' %}">
-                            <div class="position-relative me-2">
-                                <i class="fas fa-envelope fa-lg"></i>
-                                <span id="unread-messages-count" class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem; display: none;">0</span>
-                            </div>
-                            <span>Messaging</span>
-                        </a>
-                    </li>
-                    {% endif %}
                 </ul>
-                
 
-                
+                <!-- Center-aligned items (only for authenticated users) -->
                 {% if user.is_authenticated %}
-                <!-- User dropdown for mobile and desktop -->                
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown text-center">
-                        <a class="nav-link d-flex align-items-center justify-content-center dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ user.profile.image_url }}" alt="{{ user.username }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-                            <span class="ms-1 d-none d-lg-inline">{{ user.username }}</span>
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'children:dashboard' %}">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            My Children
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'notifications' %}">
+                            <i class="fas fa-bell me-2"></i>
+                            Notifications
+                            {% if unread_notifications_count > 0 %}
+                            <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">
+                                {{ unread_notifications_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'chat-inbox' %}">
+                            <i class="fas fa-envelope me-2"></i>
+                            Messaging
+                            <span id="unread-messages-count" class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem; display: none;">0</span>
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+
+                <!-- Right-aligned items -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                    <!-- User dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{{ user.profile.image_url }}" alt="{{ user.username }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                            <span class="d-none d-lg-inline">{{ user.get_full_name|default:user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li class="px-3 py-2">
@@ -640,20 +636,24 @@
                             </li>
                         </ul>
                     </li>
+                    {% else %}
+                    <!-- Login/Signup buttons -->
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <button class="nav-link btn btn-link text-center" id="darkModeToggle">
                             <i class="fas fa-moon fa-lg d-block mb-1" id="darkModeIcon"></i>
                             <span class="small">Theme</span>
                         </button>
-                    </li>
-                </ul>
-                {% else %}
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Sign In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
                     </li>
                 </ul>
                 {% endif %}
