@@ -1,0 +1,55 @@
+{% extends 'early_learning/base.html' %}
+
+{% block early_learning_content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ activity.title }}</h2>
+        <a href="{% url 'early_learning:activity_list' %}" class="btn btn-secondary">← Back to Activities</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 class="card-title">{{ activity.title }}</h3>
+                    <p class="card-text">{{ activity.description }}</p>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="milestone-badge age-group">{{ activity.get_age_group_display }}</span>
+                        <span class="milestone-badge category-badge">{{ activity.get_category_display }}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5>Duration</h5>
+                        <p>{{ activity.duration }} minutes</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5>Materials Needed</h5>
+                        <p>{{ activity.materials_needed }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5>Learning Outcomes</h5>
+                        <p>{{ activity.learning_outcomes }}</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <h5>Resources</h5>
+                    {% if resources %}
+                    <ul class="list-group">
+                        {% for resource in resources %}
+                        <li class="list-group-item">
+                            <a href="{{ resource.file.url }}" target="_blank">{{ resource.title }}</a>
+                            <p class="text-muted small">{{ resource.description }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No resources available for this activity.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

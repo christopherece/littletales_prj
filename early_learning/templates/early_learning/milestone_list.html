@@ -1,0 +1,24 @@
+{% extends 'early_learning/base.html' %}
+
+{% block early_learning_content %}
+    <h2>Development Milestones</h2>
+    
+    <div class="row">
+        {% for milestone in milestones %}
+        <div class="col-md-4 mb-4">
+            <div class="activity-card">
+                <h3>{{ milestone.title }}</h3>
+                <div class="mb-2">
+                    <span class="milestone-badge age-group">{{ milestone.get_age_group_display }}</span>
+                    <span class="milestone-badge category-badge">{{ milestone.get_category_display }}</span>
+                </div>
+                <p class="mb-2">{{ milestone.description|truncatewords:20 }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p>No milestones found.</p>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

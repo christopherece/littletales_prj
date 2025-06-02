@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}{{ site_config.welcome_title|default:"Welcome to LoopedIn" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #4a90e2;
+        --secondary-color: #2ecc71;
+        --accent-color: #e74c3c;
+        --background-color: #f8f9fa;
+        --card-bg: #ffffff;
+        --text-color: #333333;
+        --border-color: #e0e0e0;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-hero {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 4rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 3rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .welcome-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, white, white);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .welcome-hero p {
+        font-size: 1.5rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.9;
+    }
+    
+    .feature-card {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px var(--shadow-color);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px var(--shadow-color);
+    }
+    
+    .feature-card i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover i {
+        transform: scale(1.2);
+        color: var(--accent-color);
+    }
+    
+    .feature-card h3 {
+        font-size: 1.75rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+    
+    .feature-card p {
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        padding: 0.8rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+    }
+    
+    .btn-outline-primary {
+        background: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 0.8rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    }
+    
+    .illustration {
+        height: 200px;
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 welcome-hero text-center">
+            <h1 class="display-4 mb-4">{{ site_config.welcome_title|default:"Welcome to LittleTales" }}</h1>
+            <p class="lead mb-4">{{ site_config.welcome_subtitle|default:"A fun and safe space for children to learn and grow" }}</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'login' %}" class="btn btn-primary">Join the Fun</a>
+                <a href="{% url 'register' %}" class="btn btn-outline-primary">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">git remote
+        <div class="col-md-8">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-rocket fa-3x mb-3"></i>
+                            <h3 class="h5 mb-3">Learning Adventures</h3>
+                            <p class="text-muted">Explore exciting educational activities and games for kids</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-magic fa-3x mb-3"></i>
+                            <h3 class="h5 mb-3">Magic of Stories</h3>
+                            <p class="text-muted">Discover enchanting tales and interactive storytelling</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-star fa-3x mb-3"></i>
+                            <h3 class="h5 mb-3">Achievements</h3>
+                            <p class="text-muted">Earn badges and rewards for your learning journey</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

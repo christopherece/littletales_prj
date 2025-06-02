@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block title %}Notification Preferences | LoopedIn{% endblock %}
+
+{% block extra_css %}
+<style>
+    .border-start-primary {
+        border-left: 4px solid var(--linkedin-blue) !important;
+    }
+    .border-start-success {
+        border-left: 4px solid var(--linkedin-dark-blue) !important;
+    }
+    .border-start-warning {
+        border-left: 4px solid var(--linkedin-secondary-text) !important;
+    }
+    .border-start-danger {
+        border-left: 4px solid var(--linkedin-text) !important;
+    }
+    .border-start-secondary {
+        border-left: 4px solid var(--linkedin-border) !important;
+    }
+    
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-select {
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+    }
+    
+    .time-input {
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #ced4da;
+    }
+    
+    .time-input:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+    }
+</style>
+<style>
+    :root {
+        --fieldset-bg: var(--linkedin-secondary-bg);
+        --email-border: var(--linkedin-blue);
+        --notification-border: var(--linkedin-blue);
+        --sound-border: #ffc107;
+        --browser-border: #dc3545;
+        --quiet-border: #6c757d;
+    }
+
+    .fieldset-email-preferences,
+    .fieldset-notification-types,
+    .fieldset-sound-preferences,
+    .fieldset-browser-notifications,
+    .fieldset-quiet-hours {
+        background-color: var(--linkedin-card-bg);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0 0.25rem 0.25rem 0;
+        border: 1px solid var(--linkedin-border);
+    }
+    
+    .card {
+        border: 1px solid var(--linkedin-border);
+        box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+    
+    .form-control:focus {
+        border-color: var(--linkedin-blue);
+        box-shadow: 0 0 0 0.2rem rgba(var(--linkedin-blue-rgb), 0.25);
+    }
+    
+    .invalid-feedback {
+        color: var(--linkedin-text);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 class="mb-4">Notification Preferences</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h3 class="h5 mb-3">Email Preferences</h3>
+                                <div class="border-start-success p-3 rounded-end">
+                                    <div class="mb-3">
+                                        {{ form.email_enabled.label_tag }}
+                                        {{ form.email_enabled }}
+                                        {% if form.email_enabled.help_text %}
+                                        <small class="form-text text-muted">{{ form.email_enabled.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.email_enabled.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.email_enabled.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.email_frequency.label_tag }}
+                                        {{ form.email_frequency }}
+                                        {% if form.email_frequency.help_text %}
+                                        <small class="form-text text-muted">{{ form.email_frequency.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.email_frequency.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.email_frequency.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="h5 mb-3">Notification Types</h3>
+                                <div class="border-start-primary p-3 rounded-end">
+                                    <div class="mb-3">
+                                        {{ form.activity_completed_enabled.label_tag }}
+                                        {{ form.activity_completed_enabled }}
+                                        {% if form.activity_completed_enabled.help_text %}
+                                        <small class="form-text text-muted">{{ form.activity_completed_enabled.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.activity_completed_enabled.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.activity_completed_enabled.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.milestone_achieved_enabled.label_tag }}
+                                        {{ form.milestone_achieved_enabled }}
+                                        {% if form.milestone_achieved_enabled.help_text %}
+                                        <small class="form-text text-muted">{{ form.milestone_achieved_enabled.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.milestone_achieved_enabled.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.milestone_achieved_enabled.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="h5 mb-3">Sound Preferences</h3>
+                                <div class="border-start-warning p-3 rounded-end">
+                                    <div class="mb-3">
+                                        {{ form.sound_enabled.label_tag }}
+                                        {{ form.sound_enabled }}
+                                        {% if form.sound_enabled.help_text %}
+                                        <small class="form-text text-muted">{{ form.sound_enabled.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.sound_enabled.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.sound_enabled.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.sound_volume.label_tag }}
+                                        {{ form.sound_volume }}
+                                        {% if form.sound_volume.help_text %}
+                                        <small class="form-text text-muted">{{ form.sound_volume.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.sound_volume.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.sound_volume.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="h5 mb-3">Browser Notifications</h3>
+                                <div class="border-start-danger p-3 rounded-end">
+                                    <div class="mb-3">
+                                        {{ form.browser_notifications_enabled.label_tag }}
+                                        {{ form.browser_notifications_enabled }}
+                                        {% if form.browser_notifications_enabled.help_text %}
+                                        <small class="form-text text-muted">{{ form.browser_notifications_enabled.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.browser_notifications_enabled.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.browser_notifications_enabled.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.notification_priority_threshold.label_tag }}
+                                        {{ form.notification_priority_threshold }}
+                                        {% if form.notification_priority_threshold.help_text %}
+                                        <small class="form-text text-muted">{{ form.notification_priority_threshold.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.notification_priority_threshold.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.notification_priority_threshold.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="h5 mb-3">Quiet Hours</h3>
+                                <div class="border-start-secondary p-3 rounded-end">
+                                    <div class="mb-3">
+                                        {{ form.quiet_hours_enabled.label_tag }}
+                                        {{ form.quiet_hours_enabled }}
+                                        {% if form.quiet_hours_enabled.help_text %}
+                                        <small class="form-text text-muted">{{ form.quiet_hours_enabled.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.quiet_hours_enabled.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.quiet_hours_enabled.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.quiet_hours_start.label_tag }}
+                                        {{ form.quiet_hours_start }}
+                                        {% if form.quiet_hours_start.help_text %}
+                                        <small class="form-text text-muted">{{ form.quiet_hours_start.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.quiet_hours_start.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.quiet_hours_start.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.quiet_hours_end.label_tag }}
+                                        {{ form.quiet_hours_end }}
+                                        {% if form.quiet_hours_end.help_text %}
+                                        <small class="form-text text-muted">{{ form.quiet_hours_end.help_text }}</small>
+                                        {% endif %}
+                                        {% if form.quiet_hours_end.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.quiet_hours_end.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary px-4">Save Preferences</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

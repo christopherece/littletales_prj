@@ -1,0 +1,33 @@
+{% extends 'early_learning/base.html' %}
+
+{% block early_learning_content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Notifications</h2>
+        <div>
+            <a href="{% url 'early_learning:mark_all_read' %}" class="btn btn-outline-primary">Mark All as Read</a>
+            <span class="badge bg-primary ms-2">{{ unreads }}</span>
+        </div>
+    </div>
+
+    {% if notifications %}
+    <div class="list-group">
+        {% for notification in notifications %}
+        <div class="list-group-item list-group-item-action {% if not notification.read %}bg-light{% endif %}"
+             data-notification-id="{{ notification.id }}">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ notification.title }}</h5>
+                <small class="text-muted">{{ notification.created_at|timesince }}</small>
+            </div>
+            <p class="mb-1">{{ notification.message }}</p>
+            {% if notification.child %}
+            <small class="text-muted">Child: {{ notification.child.first_name }}</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No notifications yet.
+    </div>
+    {% endif %}
+{% endblock %}
