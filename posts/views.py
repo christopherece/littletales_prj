@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_GET
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import (
@@ -60,12 +61,37 @@ def home_feed(request):
         reverse=True
     )[:10]  # Show top 10 items
 
+    # Get active users (users with active sessions)
+    active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    user_ids = []
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id = data.get('_auth_user_id')
+        if user_id:
+            user_ids.append(user_id)
+    
+    active_users = User.objects.filter(id__in=user_ids).order_by('-last_login')[:10]
+    
     context = {
         'feed_items': feed_items,
         'is_paginated': True,
-        'page_obj': feed_items
+        'page_obj': feed_items,
+        'active_users': active_users
     }
     return render(request, 'posts/home.html', context)
+
+@require_GET
+def notifications_count(request):
+    """Return count of unread notifications for the current user"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'count': 0})
+    
+    count = Notification.objects.filter(
+        recipient=request.user,
+        is_read=False
+    ).count()
+    
+    return JsonResponse({'count': count})
 
 
 class CommunityPostCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):

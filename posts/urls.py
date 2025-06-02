@@ -29,6 +29,7 @@ urlpatterns = [
     path('community-post/<int:pk>/update/', CommunityPostUpdateView.as_view(), name='community-post-update'),
     path('community-post/<int:pk>/delete/', CommunityPostDeleteView.as_view(), name='community-post-delete'),
     path('notifications/', views.notifications, name='notifications'),
+    path('notifications/count/', views.notifications_count, name='notifications_count'),
     path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark-notification-read'),
     path('notifications/<int:notification_id>/mark-read/', views.mark_notification_read_ajax, name='mark-notification-read-ajax'),
 ]

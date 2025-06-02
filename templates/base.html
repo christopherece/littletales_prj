@@ -609,13 +609,6 @@
                         </a>
                     </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="{% url 'chat-inbox' %}">
-                            <i class="fas fa-envelope me-2"></i>
-                            Messaging
-                            <span id="unread-messages-count" class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem; display: none;">0</span>
-                        </a>
-                    </li>
                 </ul>
                 {% endif %}
 
@@ -641,6 +634,12 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i> View Profile</a></li>
                             <li><a class="dropdown-item" href="{% url 'user-posts' user.username %}"><i class="fas fa-file-alt me-2"></i> My Posts</a></li>
+                            <li><a class="dropdown-item" href="{% url 'notifications' %}"><i class="fas fa-bell me-2"></i> Notifications
+                                <span id="unread-notifications-count" class="badge bg-danger ms-2" style="font-size: 0.7rem; display: none;">0</span>
+                            </a></li>
+                            <li><a class="dropdown-item position-relative" href="{% url 'chat-inbox' %}"><i class="fas fa-envelope me-2"></i> Messages
+                                <span id="unread-messages-count" class="badge bg-danger ms-2" style="font-size: 0.7rem; display: none;">0</span>
+                            </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
@@ -797,6 +796,28 @@
     <!-- Custom JS -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Update unread notifications count
+            function updateUnreadNotifications() {
+                fetch('{% url 'notifications_count' %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        const countSpan = document.getElementById('unread-notifications-count');
+                        if (data.count > 0) {
+                            countSpan.textContent = data.count;
+                            countSpan.style.display = 'inline';
+                        } else {
+                            countSpan.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching notifications count:', error));
+            }
+
+            // Initial update
+            updateUnreadNotifications();
+            
+            // Update every minute
+            setInterval(updateUnreadNotifications, 60000);
+
             // Dark mode toggle functionality
             const darkModeToggle = document.getElementById('darkModeToggle');
             const darkModeIcon = document.getElementById('darkModeIcon');
