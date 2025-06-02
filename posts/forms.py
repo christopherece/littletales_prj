@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post, Announcement
+from .models import Post, Announcement, CommunityPost
 import os
 import logging
 from django.utils import timezone
@@ -18,37 +18,51 @@ class PostForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'rows': 4}),
         }
 
+class CommunityPostForm(forms.ModelForm):
+    image = forms.ImageField(required=False, widget=forms.ClearableFileInput(attrs={
+        'accept': 'image/*'
+    }), max_length=500)
+
+    class Meta:
+        model = CommunityPost
+        fields = ['title', 'content', 'image']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 4}),
+        }
+
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields['image'].required = False
 
-    def clean_media(self):
-        media = self.cleaned_data.get('media')
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.user and self.user.is_authenticated:
+            profile = self.user.profile
+            if profile.user_type != 'teacher':
+                raise forms.ValidationError('Only teachers can create community posts')
+        return cleaned_data
+
+    def clean_image(self):
+        """Validate and process the uploaded image"""
+        image = self.cleaned_data.get('image')
         if image:
             try:
-                logger.info(f"Processing file: {image.name}")
-                # Check file size
-                if image.size > 50 * 1024 * 1024:  # 50MB limit
+                # Check file size (50MB limit)
+                if image.size > 50 * 1024 * 1024:
                     raise forms.ValidationError('File size must be less than 50MB')
                 
                 # Check file type
-                valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mov', '.avi', '.webm', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx']
+                valid_extensions = ['.jpg', '.jpeg', '.png', '.gif']
                 extension = os.path.splitext(image.name)[1].lower()
                 if extension not in valid_extensions:
                     raise forms.ValidationError(f'File type not supported. Please upload a file with one of these extensions: {", ".join(valid_extensions)}')
+            except Exception as e:
+                raise forms.ValidationError(f'Error processing image: {str(e)}')
                 
-                # Set the upload_to path based on the file type
-                if extension in ['.jpg', '.jpeg', '.png', '.gif']:
-                    image.name = f'images/{image.name}'
-                elif extension in ['.mp4', '.mov', '.avi', '.webm']:
-                    image.name = f'videos/{image.name}'
-                else:
-                    image.name = f'documents/{image.name}'
+                # Set the upload_to path
+                image.name = f'community_posts/{image.name}'
                 
-                # Set the upload_to path in the form instance
-                self.instance.image.name = f'post_media/{image.name}'
-                
-                logger.info(f"File processed successfully: {image.name}")
                 return image
             except Exception as e:
                 logger.error(f'Error processing file: {str(e)}')

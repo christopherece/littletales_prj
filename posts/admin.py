@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Comment, Announcement, Notification
+from .models import Post, Comment, Announcement, CommunityPost, Notification
 from django.utils.html import format_html
 
 @admin.register(Post)
@@ -19,18 +19,37 @@ class PostAdmin(admin.ModelAdmin):
             else:
                 return format_html('<a href="{}">File</a>', obj.image.url)
         return '-'
-    show_media.short_description = 'Media'
+    show_media.short_description = 'Media Preview'
+    show_media.allow_tags = True
     
     def show_media_preview(self, obj):
         if obj.image:
             if obj.image.url.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-                return format_html('<img src="{}" style="max-width: 300px; max-height: 300px;">', obj.image.url)
+                return format_html('<img src="{}" style="max-height: 50px;">', obj.image.url)
             elif obj.image.url.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
-                return format_html('<video width="300" height="300" controls><source src="{}" type="video/mp4"></video>', obj.image.url)
+                return format_html('<video width="50" height="50" controls><source src="{}" type="video/mp4"></video>', obj.image.url)
             else:
                 return format_html('<a href="{}">File</a>', obj.image.url)
         return '-'
     show_media_preview.short_description = 'Media Preview'
+
+@admin.register(CommunityPost)
+class CommunityPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_by', 'created_at', 'show_image')
+    list_filter = ('created_at',)
+    search_fields = ('title', 'content', 'created_by__user__username')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('show_image',)
+    
+    def show_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height: 50px;">', obj.image.url)
+        return '-'
+    show_image.short_description = 'Image'
+    
+    def get_queryset(self, request):
+        # Only show posts created by teachers
+        return super().get_queryset(request).filter(created_by__user_type='teacher')
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
@@ -57,3 +76,4 @@ class NotificationAdmin(admin.ModelAdmin):
     list_filter = ('notification_type', 'is_read', 'created_at')
     search_fields = ('recipient__username', 'actor__username', 'post__title')
     date_hierarchy = 'created_at'
+    readonly_fields = ('created_at',)

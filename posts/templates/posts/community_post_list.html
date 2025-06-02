@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Community Posts</h2>
+        {% if request.user.profile.user_type == 'teacher' %}
+        <a href="{% url 'community-post-create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create Community Post
+        </a>
+        {% endif %}
+    </div>
+
+    {% if community_posts %}
+    <div class="row">
+        {% for post in community_posts %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ post.created_by.image_url }}" 
+                                 alt="{{ post.created_by.user.username }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <h5 class="mb-0">{{ post.title }}</h5>
+                                <small class="text-muted">by {{ post.created_by.user.username }}</small>
+                            </div>
+                        </div>
+                        {% if request.user.profile == post.created_by %}
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle" type="button" id="postOptions{{ post.pk }}" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="postOptions{{ post.pk }}">
+                                <li><a class="dropdown-item" href="{% url 'community-post-update' post.pk %}">Edit</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'community-post-delete' post.pk %}">Delete</a></li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" class="img-fluid rounded mb-3" alt="{{ post.title }}">
+                    {% endif %}
+
+                    <p class="card-text">{{ post.content|linebreaks }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ post.created_at|naturaltime }}</small>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'community-post-detail' post.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+        <h3>No community posts yet</h3>
+        <p class="text-muted">Be the first to create a community post!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

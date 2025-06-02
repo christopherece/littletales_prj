@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from PIL import Image
 from children.models import Child
+from django.utils.text import slugify
 
 # Create your models here.
 class Post(models.Model):
@@ -139,14 +140,9 @@ class Announcement(models.Model):
         """Ensure only teachers can create announcements and validate dates"""
         if self.created_by and self.created_by.user_type != 'teacher':
             raise ValidationError('Only teachers can create announcements')
-        
-        if self.event_date < timezone.now():
+        if self.event_date and self.event_date < timezone.now():
             raise ValidationError('Event date must be in the future')
             
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-    
     def save(self, *args, **kwargs):
         # Set is_active to True by default if not already set
         if not hasattr(self, 'is_active') or self.is_active is None:
@@ -178,3 +174,40 @@ class Notification(models.Model):
     
     def __str__(self):
         return f'{self.actor.username} {self.notification_type}d your post "{self.post.title}"'
+
+
+class CommunityPost(models.Model):
+    """Model for community posts that only teachers can create"""
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    image = models.ImageField(upload_to='community_posts/%Y/%m/%d/', blank=True, null=True)
+    created_by = models.ForeignKey('users.Profile', on_delete=models.CASCADE, related_name='community_posts')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Community Post'
+        verbose_name_plural = 'Community Posts'
+    
+    def __str__(self):
+        try:
+            creator_username = self.created_by.user.username if self.created_by and self.created_by.user else 'Unknown'
+            creator_type = self.created_by.get_user_type_display() if self.created_by else 'Unknown'
+            return f"{self.title} by {creator_username} ({creator_type})"
+        except AttributeError:
+            return f"{self.title} (creator not set)"
+    
+    @property
+    def image_url(self):
+        """Return the image URL or default image if none exists"""
+        if self.image:
+            return self.image.url
+        return '/static/img/user-default.png'
+    
+    def get_absolute_url(self):
+        """Get URL for viewing the community post"""
+        return reverse('community-post-detail', kwargs={'pk': self.pk})
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)

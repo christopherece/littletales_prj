@@ -30,7 +30,7 @@
             {% for item in feed_items %}
                 <div class="card post-card">
                     <div class="post-header">
-                        <img src="{{ item.image_url }}" 
+                        <img src="{% if item.is_post %}{{ item.author.image_url }}{% else %}{{ item.created_by.image_url }}{% endif %}" 
                              alt="{% if item.is_post %}{{ item.author.user.username }}{% else %}{{ item.created_by.user.username }}{% endif %}" 
                              class="rounded-circle">
                         <div class="post-meta">
@@ -43,6 +43,8 @@
                                 <span class="badge bg-secondary ms-2">{{ item.get_post_type_display }}</span>
                             {% elif item.announcement_type %}
                                 <span class="badge bg-info ms-2">{{ item.get_announcement_type_display }}</span>
+                            {% elif item.community_post %}
+                                <span class="badge bg-success ms-2">Community Post</span>
                             {% endif %}
                         </div>
                         {% if item.author == user or item.created_by == user.profile %}
@@ -65,7 +67,7 @@
                         {% endif %}
                     </div>
                      <div class="post-content">
-                        <h3><a href="{% if item.is_post %}{% url 'post-detail' item.id %}{% else %}{% url 'announcement-detail' item.id %}{% endif %}" class="text-decoration-none">{{ item.title }}</a></h3>
+                        <h3><a href="{% if item.is_post %}{% url 'post-detail' item.id %}{% elif item.announcement_type %}{% url 'announcement-detail' item.id %}{% else %}{% url 'community-post-detail' item.id %}{% endif %}" class="text-decoration-none">{{ item.title }}</a></h3>
                         {% if item.image %}
                             <div class="post-media mb-3">
                                 <img src="{{ item.image.url }}" alt="{{ item.title }}" class="img-fluid rounded">

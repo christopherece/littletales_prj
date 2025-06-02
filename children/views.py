@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Child, LearningActivity
 from early_learning.models import Notification
+from posts.models import CommunityPost
 from .forms import ChildForm, LearningActivityForm
 
 @login_required
@@ -18,10 +19,14 @@ def child_dashboard(request):
         read=False
     ).order_by('-created_at')
     
+    # Get recent community posts
+    recent_community_posts = CommunityPost.objects.all().order_by('-created_at')[:5]
+    
     context = {
         'children': children,
         'recent_activities': recent_activities,
         'unread_notifications': unread_notifications,
+        'recent_community_posts': recent_community_posts,
     }
     return render(request, 'children/dashboard.html', context)
 

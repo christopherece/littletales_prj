@@ -9,11 +9,11 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Count, Q
 from django.contrib.sessions.models import Session
-from .models import Post, Comment, Announcement, Notification
+from .models import Post, Comment, Announcement, CommunityPost, Notification
 from django.contrib.auth.models import User
 from users.models import Profile
 from django.contrib import messages
-from .forms import PostForm, AnnouncementForm
+from .forms import PostForm, AnnouncementForm, CommunityPostForm
 
 class AnnouncementDetailView(LoginRequiredMixin, DetailView):
     model = Announcement
@@ -24,18 +24,112 @@ class AnnouncementDetailView(LoginRequiredMixin, DetailView):
         return Announcement.objects.filter(is_active=True)
 
 
-class AnnouncementCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class AnnouncementCreateView(LoginRequiredMixin, CreateView):
     model = Announcement
     form_class = AnnouncementForm
     template_name = 'posts/announcement_form.html'
-    
-    def test_func(self):
-        return self.request.user.profile.user_type == 'teacher'
-    
+
     def form_valid(self, form):
         form.instance.created_by = self.request.user.profile
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse('announcement-detail', kwargs={'pk': self.object.pk})
+
+class CommunityPostListView(LoginRequiredMixin, ListView):
+    model = CommunityPost
+    template_name = 'posts/community_post_list.html'
+    context_object_name = 'community_posts'
+    ordering = ['-created_at']
+    paginate_by = 10
+
+    def get_queryset(self):
+        return CommunityPost.objects.all()
+
+def home_feed(request):
+    """Combined feed view showing posts, announcements, and community posts"""
+    # Get the latest posts, announcements, and community posts
+    posts = Post.objects.all().order_by('-created_at')[:5]
+    announcements = Announcement.objects.filter(is_active=True).order_by('-created_at')[:5]
+    community_posts = CommunityPost.objects.all().order_by('-created_at')[:5]
+
+    # Combine and sort all items by created_at
+    feed_items = sorted(
+        list(posts) + list(announcements) + list(community_posts),
+        key=lambda x: x.created_at,
+        reverse=True
+    )[:10]  # Show top 10 items
+
+    context = {
+        'feed_items': feed_items,
+        'is_paginated': True,
+        'page_obj': feed_items
+    }
+    return render(request, 'posts/home.html', context)
+
+
+class CommunityPostCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = CommunityPost
+    form_class = CommunityPostForm
+    template_name = 'posts/community_post_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        # Set created_by before saving
+        form.instance.created_by = self.request.user.profile
+        # Save the form instance
+        self.object = form.save()
+        # Redirect to success URL
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('community-post-detail', kwargs={'pk': self.object.pk})
+
+    def test_func(self):
+        # Check if user is a teacher
+        return self.request.user.profile.user_type == 'teacher'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add any additional context data if needed
+        return context
+
+class CommunityPostDetailView(LoginRequiredMixin, DetailView):
+    model = CommunityPost
+    template_name = 'posts/community_post_detail.html'
+    context_object_name = 'community_post'
+
+    def get_queryset(self):
+        return CommunityPost.objects.all()
+
+class CommunityPostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = CommunityPost
+    form_class = CommunityPostForm
+    template_name = 'posts/community_post_form.html'
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user.profile
+        return super().form_valid(form)
+
+    def test_func(self):
+        community_post = self.get_object()
+        return community_post.created_by == self.request.user.profile
+
+    def get_success_url(self):
+        return reverse('community-post-detail', kwargs={'pk': self.object.pk})
+
+class CommunityPostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = CommunityPost
+    template_name = 'posts/community_post_confirm_delete.html'
+    success_url = reverse_lazy('community-post-list')
+
+    def test_func(self):
+        community_post = self.get_object()
+        return community_post.created_by == self.request.user.profile
 
 class AnnouncementUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Announcement
